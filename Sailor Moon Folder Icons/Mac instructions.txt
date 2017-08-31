@@ -1,0 +1,8 @@
+1) Click the volume, application, folder, or file whose icon you want to paste onto another item.
+2) From the File menu, choose Get Info or press Command-I to open the Get Info window.
+3) Click the icon in the upper-left corner of the Get Info window to select it.
+4) From the Edit menu, choose Copy or press Command-C.
+5) Select the volume, application, folder, or file whose icon you want to replace.
+6) From the File menu, choose Get Info or press Command-I.
+7) Click the icon in the upper-left corner.
+8)From the Edit menu, choose Paste or press Command-V to replace the icon.

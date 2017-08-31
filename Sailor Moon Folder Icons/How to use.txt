@@ -1,0 +1,11 @@
+1) Right-click the folder you want to change.
+2) Select properties.
+3) Click the "customize" tab.
+4) Select "change icon".
+5) Select browse and navigate to whatever location you stored the icons in.
+6) Double-click the desired icon, then click apply.
+
+RESIZING:
+Hold down CTRL and Scroll using the mouse wheel (while desktop is active).
+
+Enjoy!
