@@ -15,6 +15,11 @@ using Microsoft.Office.Interop.Access.Dao;
 
 namespace SHeDChecklist
 {
+    public class DataPoints
+    {
+        public double xVal { get; set; }
+        public double yVal { get; set; }
+    }
     public class Database
     {
         static string[] Scopes = { SheetsService.Scope.SpreadsheetsReadonly };
@@ -45,7 +50,8 @@ namespace SHeDChecklist
         private OleDbDataReader read;
         private string query;
         private const string FILENAME = "StudentWork.accdb";
-        private string CONNECTIONSTRING = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=J:\SHeDChecklist\SHeDChecklist\" +  FILENAME;
+        private string CONNECTIONSTRING2 = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=J:\SHeDChecklist\SHeDChecklist\" +  FILENAME;
+        private string CONNECTIONSTRING = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=C:\Users\Vestia\Desktop\SHeDChecklist\SHeDChecklist\StudentWork.mdb";
         //this method checks the day the checklist was used.  If it isn't current day method returns false.
         public bool CheckDay()
         {
@@ -499,6 +505,162 @@ namespace SHeDChecklist
                 MessageBox.Show("Could not get student list from local database, please contact admin for help.  " + ex);
                 return null;
             }
+        }
+        public void CreateLinearPoints()
+        {
+            if (DeleteLinearPoints())
+            {
+                CreateATCDataPoints();
+                CreateSHEDDataPoints();
+            }           
+        }
+        public bool DeleteLinearPoints()
+        {
+            try
+            {
+                query = "DELETE * FROM LinearValues";
+                conn = new OleDbConnection(CONNECTIONSTRING);
+                com = new OleDbCommand(query, conn);
+                conn.Open();
+                com.ExecuteNonQuery();
+                conn.Close();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not create linear regression points for report view.  Please contact admin for help.");
+                return false;
+            }
+        }
+        public bool CreateATCDataPoints()
+        {
+            try
+            {
+                var collection = GetDataPoints("ATCWork");
+                double SigmaX = 0;
+                double SigmaY = 0;
+                double SigmaXY = 0;
+                double SigmaXsquared = 0;
+                int n = collection.Count();
+                foreach (var x in collection)
+                {
+                    SigmaX += Double.Parse(x.description);
+                    SigmaXsquared += Math.Pow(Double.Parse(x.description), 2);
+                }
+                foreach (var y in collection)
+                {
+                    SigmaY += Double.Parse(y.documentation);
+                }
+                for (int i = 0; i < 5; i++)
+                {
+                    SigmaXY += Double.Parse(collection[i].description) * Double.Parse(collection[i].documentation);
+                }
+                double slope = ((n * SigmaXY) - (SigmaX * SigmaY)) / ((n * SigmaXsquared) - (Math.Pow(SigmaX, 2)));
+                slope = slope * -1;
+                double intercept = (SigmaY - slope * (SigmaX)) / n;
+                var newList = new List<DataPoints>();
+                int counter = 0;
+                foreach (var x in collection)
+                {
+                    var DP = new DataPoints();
+                    DP.xVal = Double.Parse(x.description);
+                    DP.yVal = intercept + slope * counter;
+                    newList.Add(DP);
+                    counter++;
+                }
+                foreach (var point in newList)
+                {
+                    query = "INSERT INTO LinearValues (Report, XValue, YValue) VALUES(?, ?,?)";
+                    conn = new OleDbConnection(CONNECTIONSTRING);
+                    com = new OleDbCommand(query, conn);
+                    conn.Open();
+                    com.Parameters.AddWithValue(@"Report", "ATCWork");
+                    com.Parameters.AddWithValue(@"XValue", point.xVal.ToString());
+                    com.Parameters.AddWithValue(@"YValue", point.yVal.ToString());
+                    com.ExecuteNonQuery();
+                    conn.Close();
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not create linear regression points for SHEDWork, please contact admin for help.");
+                return false;
+            }
+        }
+        public bool CreateSHEDDataPoints()
+        {
+            try
+            {
+                var collection = GetDataPoints("SHEDWork");
+                double SigmaX = 0;
+                double SigmaY = 0;
+                double SigmaXY = 0;
+                double SigmaXsquared = 0;
+                int n = collection.Count();
+                foreach (var x in collection)
+                {
+                    SigmaX += Double.Parse(x.description);
+                    SigmaXsquared += Math.Pow(Double.Parse(x.description), 2);
+                }
+                foreach (var y in collection)
+                {
+                    SigmaY += Double.Parse(y.documentation);
+                }
+                for (int i = 0; i < 5; i++)
+                {
+                    SigmaXY += Double.Parse(collection[i].description) * Double.Parse(collection[i].documentation);
+                }
+                double slope = ((n * SigmaXY) - (SigmaX * SigmaY)) / ((n * SigmaXsquared) - (Math.Pow(SigmaX, 2)));
+                slope = slope * -1;
+                double intercept = (SigmaY - slope * (SigmaX)) / n;
+                var newList = new List<DataPoints>();
+                int counter = 0;
+                foreach (var x in collection)
+                {
+                    var DP = new DataPoints();
+                    DP.xVal = Double.Parse(x.description);
+                    DP.yVal = intercept + slope * counter;
+                    newList.Add(DP);
+                    counter++;
+                }
+                foreach (var point in newList)
+                {
+                    query = "INSERT INTO LinearValues (Report, XValue, YValue) VALUES(?, ?,?)";
+                    conn = new OleDbConnection(CONNECTIONSTRING);
+                    com = new OleDbCommand(query, conn);
+                    conn.Open();
+                    com.Parameters.AddWithValue(@"Report", "SHEDWork");
+                    com.Parameters.AddWithValue(@"XValue", point.xVal.ToString());
+                    com.Parameters.AddWithValue(@"YValue", point.yVal.ToString());
+                    com.ExecuteNonQuery();
+                    conn.Close();
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not create linear regression points for SHEDWork, please contact admin for help.");
+                return false;
+            }
+        }
+        public List<ChecklistItem> GetDataPoints(string table)
+        {
+            var items = new List<ChecklistItem>();
+            string query = "SELECT 150 AS History, SUM(IIF(Initials <> '', 1, 0)) AS Completed, COUNT(*) AS Total, ROUND(100 * SUM(IIF(Initials <> '', 1, 0)) / COUNT(*), 2) AS [Percent Complete] From " + table  +" WHERE DATEVALUE(TaskDate)BETWEEN Now() - 180 AND Now() - 150 UNION SELECT 120 AS History, SUM(IIF(Initials <> '', 1, 0)) AS Completed, COUNT(*) AS Total, ROUND(100 * SUM(IIF(Initials <> '', 1, 0)) / COUNT(*), 2) AS[Percent Complete] FROM " + table +" WHERE DATEVALUE(TaskDate) BETWEEN Now() - 150 AND Now() - 120 UNION SELECT 90 AS History, SUM(IIF(Initials <> '', 1, 0)) AS Completed, COUNT(*) AS Total, ROUND(100 * SUM(IIF(Initials <> '', 1, 0)) / COUNT(*), 2) AS[Percent Complete] From " + table  +" WHERE DATEVALUE(TaskDate) BETWEEN Now() - 120 AND Now() - 90 UNION SELECT 60 AS History, SUM(IIF(Initials <> '', 1, 0)) AS Completed, COUNT(*) AS Total, ROUND(100 * SUM(IIF(Initials <> '', 1, 0)) / COUNT(*), 2) AS[Percent Complete] From " + table  +" WHERE DATEVALUE(TaskDate) BETWEEN Now() - 90 AND Now() - 60 UNION SELECT 30 AS History, SUM(IIF(Initials <> '', 1, 0)) AS Completed, COUNT(*) AS Total, ROUND(100 * SUM(IIF(Initials <> '', 1, 0)) / COUNT(*), 2) AS[Percent Complete] From " + table  +"   WHERE DATEVALUE(TaskDate) BETWEEN Now() - 60 AND Now() - 30 UNION SELECT 0 AS History, SUM(IIF(Initials <> '', 1, 0)) AS Completed, COUNT(*) AS Total, ROUND(100 * SUM(IIF(Initials <> '', 1, 0)) / COUNT(*), 2) AS[Percent Complete] From " + table  +" WHERE DATEVALUE(TaskDate) BETWEEN Now() - 30 AND Now() - 0 ORDER BY History DESC";
+            conn = new OleDbConnection(CONNECTIONSTRING);
+            com = new OleDbCommand(query, conn);
+            conn.Open();
+            read = com.ExecuteReader();
+            while (read.Read())
+            {
+                c = new ChecklistItem();
+                c.description = read[0].ToString();
+                c.documentation = read[3].ToString();
+                items.Add(c);
+            }
+            conn.Close();
+            return items;
         }
         public ChecklistItem GetSHEDTaskDescription(string title)//based upon which task user selects, returns the description of that task
         {

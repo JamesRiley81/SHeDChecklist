@@ -33,7 +33,7 @@ namespace SHeDChecklist
                 if (input == string.Empty)
                     return;
             } while (input != ADMINPASSWORD);
-            Form admin = new AdminForm();
+            Form admin = new Form1();
             admin.ShowDialog();         
         }
 
@@ -41,6 +41,7 @@ namespace SHeDChecklist
         {
             this.BackColor = System.Drawing.Color.FromArgb(181, 174, 249);
             Database d = new Database();
+            d.CreateLinearPoints();
             if (!d.CheckDay())
             {
                 Task.Run(() => { MessageBox.Show("Program is busy updating values.  Do not attempt to restart or stop program until finished."); });
