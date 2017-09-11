@@ -127,7 +127,6 @@ namespace SHeDChecklist
             lineChart.ChartAreas[0].AxisX.Title = "For week of";
             lineChart.Series.Clear();
             timeGraph = false;
-            SetDaysBack();
             ser1 = new Series();
             ser1.ChartType = SeriesChartType.Line;
             ser1.LegendText = "Actual Values";
@@ -139,42 +138,20 @@ namespace SHeDChecklist
             switch (button.Name)
             {
                 case "shedRadioButton":
+                    var points = d.GetDataPoints("SHEDWork");
+                    dgv1.DataSource = points;
+                    dgv1.Visible = true;
                     report = "SHEDWork";
+                    weeklyLabel.Visible = true;
                     break;
                 case "atcRadioButton":
+                    var points2 = d.GetDataPoints("ATCWork");
+                    dgv1.DataSource = points2;
                     report = "ATCWork";
+                    dgv1.Visible = true;
+                    weeklyLabel.Visible = true;
                     break;
-            }
-            if (report != null)
-            {
-                DateTime startday = DateTime.Now.AddDays(-1 * daysBack).Date;
-                DateTime endday = startday.AddDays(6).Date;
-                lineChart.ChartAreas[0].AxisY.Maximum = 100;
-                lineChart.ChartAreas[0].AxisY.Minimum = 0;
-                lineChart.ChartAreas[0].AxisX.LabelStyle.Angle = -90;
-                ser1.BorderWidth = 3;
-                ser1.Color = System.Drawing.Color.CadetBlue;
-                ser1.MarkerStyle = MarkerStyle.Diamond;
-                ser1.MarkerColor = System.Drawing.Color.DarkOrange;
-                ser1.MarkerSize = 6;
-                int counter = 0;
-                do
-                {
-                    DataPoint data = new DataPoint();
-                    data.AxisLabel = endday.AddDays(GetDayLabel(endday.DayOfWeek)).ToShortDateString();
-                    double perc = d.GetPercent(report, startday, endday);
-                    if (double.IsNaN(perc))
-                        perc = 0;
-                    data.SetValueXY(counter++, perc);
-                    ser1.Points.Add(data);
-                    startday = endday.AddDays(1);
-                    endday = startday.AddDays(6);
-                } while (startday < DateTime.Now);
-                lineChart.ChartAreas[0].AxisX.ScaleView.Size = counter;
-                lineChart.Series.Add(ser1);
-            }
-            else
-                return;
+            }         
             dataGrid.Rows.Clear();
             dataGrid.Columns.Clear();
             dataGrid.Visible = true;
@@ -198,35 +175,6 @@ namespace SHeDChecklist
                 }    
             }
         }
-        public void SetDaysBack()
-        {
-            DateTime n = DateTime.Now;
-            switch (n.DayOfWeek)
-            {
-                case DayOfWeek.Sunday:
-                    daysBack = 181;
-                    break;
-                case DayOfWeek.Monday:
-                    daysBack = 182;
-                    break;
-                case DayOfWeek.Tuesday:
-                    daysBack = 183;
-                    break;
-                case DayOfWeek.Wednesday:
-                    daysBack = 184;
-                    break;
-                case DayOfWeek.Thursday:
-                    daysBack = 185;
-                    break;
-                case DayOfWeek.Friday:
-                    daysBack = 186;
-                    break;
-                case DayOfWeek.Saturday:
-                    daysBack = 187;
-                    break;
-            }
-        }
-
         private void triageReport_CheckedChanged(object sender, EventArgs e)
         {
             studentsListBox.Items.Clear();
@@ -240,7 +188,9 @@ namespace SHeDChecklist
             dataGrid.Visible = false;
             studentContributionLabel.Visible = false;
             if (button.Name == "triageReport")
-                CreateSHEDTriageReport();
+            {
+                var points = d.GetTriagePoints("SHEDWork");
+            }
             else if (button.Name == "atcTriageReport")
                 CreateATCTriageReport();
             
@@ -258,118 +208,10 @@ namespace SHeDChecklist
         }
         public void CreateSHEDTriageReport()
         {
-            lineChart.Series.Clear();
-            ser1 = new Series();
-            ser2 = new Series();
-            ser3 = new Series();
-            ser4 = new Series();
-            lineChart.ChartAreas[0].AxisX.MajorGrid.Enabled = true;
-            lineChart.ChartAreas[0].AxisY.MajorGrid.Enabled = true;
-            ser1.LegendText = "Actual Values";
-            ser1.ChartType = SeriesChartType.Point;
-            ser1.MarkerStyle = MarkerStyle.Diamond;
-            ser1.MarkerColor = System.Drawing.Color.Blue;
-            ser1.MarkerSize = 9;
-            ser2.ChartType = SeriesChartType.Line;
-            ser2.LegendText = "Regression";
-            ser3.ChartType = SeriesChartType.Spline;
-            ser3.LegendText = "STD+1";
-            ser4.ChartType = SeriesChartType.Spline;
-            ser4.LegendText = "STD+2";
-            lineChart.ChartAreas[0].AxisY.Title = "Elapsed time in minutes";
-            lineChart.ChartAreas[0].AxisX.Title = "Date";
-            List<double> values = new List<double>();
-            List<double> values2 = new List<double>();
-            timeGraph = true;
-            TimeSpan TS = new TimeSpan(7, 30, 00);
-            lineChart.ChartAreas[0].AxisY.Minimum = 0;           
-            TimeSpan start = new TimeSpan(7, 30, 00);
-            TimeSpan End = new TimeSpan(12, 00, 00);
-            int minutes = (start.Minutes - End.Minutes) + 60 * (End.Hours - start.Hours);
-            lineChart.ChartAreas[0].AxisY.Maximum = minutes;
-            int counter = 0;
-            List<ChecklistItem> items = d.GetTimes();
-            double SigmaY = 0;
-            foreach (ChecklistItem c in Sorting())
-            {
-                DateTime day = DateTime.Parse(c.day);
-                TimeSpan startTime = new TimeSpan(7, 30, 00);
-                TimeSpan recordTime = TimeSpan.Parse(c.time);
-                int differenceMins = recordTime.Minutes - startTime.Minutes;
-                int differenceHours = recordTime.Hours - startTime.Hours;
-                int output = differenceMins + differenceHours * 60;
-                values.Add(output);
-                DataPoint dp = new DataPoint();
-                dp.AxisLabel = day.ToShortDateString();
-                if (output >= 270)
-                    output = 270;
-                dp.SetValueXY(counter++, output);
-                ser1.Points.Add(dp);
-            }
-            lineChart.ChartAreas[0].AxisX.ScaleView.Size = counter;
-            //Linear Regression Graph
-            double SigmaX = 0;
-            double SigmaXY = 0;
-            int n = values.Count;
-            for (int i = n; i > 0; i--)
-            {
-                values2.Add(i);
-            }
-            SigmaX = values2.Sum();
-            SigmaY = values.Sum();
-            for (int y = 0; y < n; y++)
-            {
-                SigmaXY += values[y] * values2[y];
-            }
-            double SigmaXSquared = 0;
-            for (int y = 0; y < n; y++)
-            {
-                SigmaXSquared += Math.Pow(values2[y], 2);
-            }
-            double slope = ((n * SigmaXY) - (SigmaX*SigmaY))/((n * SigmaXSquared) - (Math.Pow(SigmaX, 2)));
-            slope = slope * -1;
-            double intercept = (SigmaY - slope * (SigmaX)) / n;
-            List<double> yVals = new List<double>();
-            for (int i = 0; i < n; i++)
-            {
-                DataPoint data = new DataPoint();
-                data.SetValueXY(i, intercept + slope * i);
-                if (i % 4 == 0)
-                    yVals.Add(intercept + slope * i);
-                ser2.Points.Add(data);
-            }
-            int sections = n / 4;
-            counter = 0;
-            while (counter < sections)
-            {
-                double sum = 0;
-                double mean = 0;
-                double sqrt = 0;
-                double mean2 = 0;
-                double distance = 0;
-                for (int i = counter * 4; i < (counter + 1) * 4; i++)
-                {
-                    sum += values[i];
-                }
-                mean = sum / 4;
-                for (int j = counter * 4; j < (counter + 1) * 4; j++)
-                {
-                    distance += Math.Pow(values[j] - mean,2);
-                }
-                mean2 = distance / 4;
-                sqrt = Math.Sqrt(mean2);
-                DataPoint data2 = new DataPoint();
-                data2.SetValueXY((counter) * 4, yVals[counter] + sqrt);
-                DataPoint data3 = new DataPoint();
-                data3.SetValueXY((counter) * 4, yVals[counter] - sqrt);
-                ser3.Points.Add(data2);
-                ser4.Points.Add(data3);
-                counter++;               
-            }
-            lineChart.Series.Add(ser1);
-            lineChart.Series.Add(ser2);
-            lineChart.Series.Add(ser3);
-            lineChart.Series.Add(ser4);
+            lineChart.Visible = false;
+            
+          
+   
         }
         public void CreateATCTriageReport()
         {
@@ -509,6 +351,8 @@ namespace SHeDChecklist
             lineChart.Series.Remove(ser2);
             lineChart.Series.Remove(ser3);
             lineChart.Series.Remove(ser4);
+            dgv1.Visible = false;
+            weeklyLabel.Visible = false;
             foreach (string s in students)
             {
                 if (s != string.Empty)
@@ -521,6 +365,8 @@ namespace SHeDChecklist
         {
             timeGraph = false;
             lineChart.Series.Clear();
+            lineChart.Visible = true;
+            dgv1.Visible = false;
             List<string> students = new List<string>();
             List<string> tasks = new List<string>();
             lineChart.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
@@ -603,6 +449,23 @@ namespace SHeDChecklist
         {
             //Causes JIT Error, queries to delete out old records should be done directly through access
             //d.RunAccessQueries();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var d = new Database();
+            var points = d.GetDataPoints("SHEDWork");
+            dgv1.DataSource = points;
+        }
+
+        private void studentContributionLabel_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }

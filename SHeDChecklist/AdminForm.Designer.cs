@@ -41,9 +41,12 @@
             this.studentContributionLabel = new System.Windows.Forms.Label();
             this.studentsListBox = new System.Windows.Forms.CheckedListBox();
             this.generateButton = new System.Windows.Forms.Button();
+            this.dgv1 = new System.Windows.Forms.DataGridView();
+            this.weeklyLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.lineChart)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv1)).BeginInit();
             this.SuspendLayout();
             // 
             // lineChart
@@ -56,12 +59,13 @@
             this.lineChart.Cursor = System.Windows.Forms.Cursors.Default;
             legend1.Name = "Legend1";
             this.lineChart.Legends.Add(legend1);
-            this.lineChart.Location = new System.Drawing.Point(38, 168);
+            this.lineChart.Location = new System.Drawing.Point(22, 166);
             this.lineChart.Name = "lineChart";
             this.lineChart.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
-            this.lineChart.Size = new System.Drawing.Size(1409, 527);
+            this.lineChart.Size = new System.Drawing.Size(1034, 367);
             this.lineChart.TabIndex = 1;
             this.lineChart.Text = "Student Work Report";
+            this.lineChart.Visible = false;
             this.lineChart.GetToolTipText += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.ToolTipEventArgs>(this.lineChart_GetToolTipText);
             // 
             // shedRadioButton
@@ -84,7 +88,7 @@
             this.panel1.Controls.Add(this.triageReport);
             this.panel1.Controls.Add(this.atcRadioButton);
             this.panel1.Controls.Add(this.shedRadioButton);
-            this.panel1.Location = new System.Drawing.Point(220, 22);
+            this.panel1.Location = new System.Drawing.Point(16, 12);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(131, 126);
             this.panel1.TabIndex = 4;
@@ -140,28 +144,30 @@
             // dataGrid
             // 
             this.dataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGrid.Location = new System.Drawing.Point(676, 48);
+            this.dataGrid.Location = new System.Drawing.Point(21, 242);
             this.dataGrid.Name = "dataGrid";
             this.dataGrid.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.dataGrid.Size = new System.Drawing.Size(227, 114);
+            this.dataGrid.Size = new System.Drawing.Size(227, 380);
             this.dataGrid.TabIndex = 5;
             this.dataGrid.Visible = false;
+            this.dataGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGrid_CellContentClick);
             // 
             // studentContributionLabel
             // 
             this.studentContributionLabel.AutoSize = true;
             this.studentContributionLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.studentContributionLabel.Location = new System.Drawing.Point(672, 22);
+            this.studentContributionLabel.Location = new System.Drawing.Point(18, 213);
             this.studentContributionLabel.Name = "studentContributionLabel";
-            this.studentContributionLabel.Size = new System.Drawing.Size(236, 20);
+            this.studentContributionLabel.Size = new System.Drawing.Size(230, 20);
             this.studentContributionLabel.TabIndex = 6;
-            this.studentContributionLabel.Text = "Overall Contribution Per Student";
+            this.studentContributionLabel.Text = "Overall Contribution By Student";
             this.studentContributionLabel.Visible = false;
+            this.studentContributionLabel.Click += new System.EventHandler(this.studentContributionLabel_Click);
             // 
             // studentsListBox
             // 
             this.studentsListBox.FormattingEnabled = true;
-            this.studentsListBox.Location = new System.Drawing.Point(1195, 39);
+            this.studentsListBox.Location = new System.Drawing.Point(345, 12);
             this.studentsListBox.Name = "studentsListBox";
             this.studentsListBox.Size = new System.Drawing.Size(79, 109);
             this.studentsListBox.Sorted = true;
@@ -170,7 +176,7 @@
             // 
             // generateButton
             // 
-            this.generateButton.Location = new System.Drawing.Point(1280, 114);
+            this.generateButton.Location = new System.Drawing.Point(439, 15);
             this.generateButton.Name = "generateButton";
             this.generateButton.Size = new System.Drawing.Size(75, 34);
             this.generateButton.TabIndex = 8;
@@ -179,18 +185,41 @@
             this.generateButton.Visible = false;
             this.generateButton.Click += new System.EventHandler(this.generateButton_Click);
             // 
+            // dgv1
+            // 
+            this.dgv1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgv1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv1.Location = new System.Drawing.Point(345, 242);
+            this.dgv1.Name = "dgv1";
+            this.dgv1.Size = new System.Drawing.Size(682, 380);
+            this.dgv1.TabIndex = 10;
+            this.dgv1.Visible = false;
+            // 
+            // weeklyLabel
+            // 
+            this.weeklyLabel.AutoSize = true;
+            this.weeklyLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.weeklyLabel.Location = new System.Drawing.Point(549, 213);
+            this.weeklyLabel.Name = "weeklyLabel";
+            this.weeklyLabel.Size = new System.Drawing.Size(248, 20);
+            this.weeklyLabel.TabIndex = 11;
+            this.weeklyLabel.Text = "Week By Week Completion Rates";
+            this.weeklyLabel.Visible = false;
+            // 
             // AdminForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Silver;
-            this.ClientSize = new System.Drawing.Size(1459, 736);
+            this.ClientSize = new System.Drawing.Size(1103, 736);
+            this.Controls.Add(this.weeklyLabel);
+            this.Controls.Add(this.dgv1);
             this.Controls.Add(this.generateButton);
             this.Controls.Add(this.studentsListBox);
             this.Controls.Add(this.studentContributionLabel);
             this.Controls.Add(this.dataGrid);
-            this.Controls.Add(this.panel1);
             this.Controls.Add(this.lineChart);
+            this.Controls.Add(this.panel1);
             this.Name = "AdminForm";
             this.Text = "AdminForm";
             this.Load += new System.EventHandler(this.AdminForm_Load);
@@ -198,6 +227,7 @@
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -215,5 +245,7 @@
         private System.Windows.Forms.RadioButton individualTasksButton;
         private System.Windows.Forms.CheckedListBox studentsListBox;
         private System.Windows.Forms.Button generateButton;
+        private System.Windows.Forms.DataGridView dgv1;
+        private System.Windows.Forms.Label weeklyLabel;
     }
 }

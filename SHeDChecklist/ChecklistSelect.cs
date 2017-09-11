@@ -33,15 +33,15 @@ namespace SHeDChecklist
                 if (input == string.Empty)
                     return;
             } while (input != ADMINPASSWORD);
-            Form admin = new Form1();
-            admin.ShowDialog();         
+            Form aList = new AdminForm();
+            aList.ShowDialog();
         }
 
         private void ChecklistSelect_Load(object sender, EventArgs e)
         {
             this.BackColor = System.Drawing.Color.FromArgb(181, 174, 249);
             Database d = new Database();
-            d.CreateLinearPoints();
+            d.GetDataPoints("SHEDWork");
             if (!d.CheckDay())
             {
                 Task.Run(() => { MessageBox.Show("Program is busy updating values.  Do not attempt to restart or stop program until finished."); });

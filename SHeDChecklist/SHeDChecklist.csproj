@@ -183,11 +183,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Student.cs" />
-    <Compile Include="StudentWorkDataSet.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>StudentWorkDataSet.xsd</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="AdminForm.resx">
       <DependentUpon>AdminForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -229,17 +224,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="StudentWorkDataSet.xsc">
-      <DependentUpon>StudentWorkDataSet.xsd</DependentUpon>
-    </None>
-    <None Include="StudentWorkDataSet.xsd">
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>StudentWorkDataSet.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="StudentWorkDataSet.xss">
-      <DependentUpon>StudentWorkDataSet.xsd</DependentUpon>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
