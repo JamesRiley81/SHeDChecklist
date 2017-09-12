@@ -115,15 +115,17 @@ namespace SHeDChecklist
         }
         private void shedRadioButton_CheckedChanged(object sender, EventArgs e)
         {
-            studentsListBox.Items.Clear();
-            studentsListBox.Visible = false;
+           
             if (shedRadioButton.Checked)
             {
+                studentsListBox.Items.Clear();
+                studentsListBox.Visible = false;
+                lineChart.Visible = false;
+                generateButton.Visible = false;
                 var points = d.GetDataPoints("SHEDWork");
                 dgv1.DataSource = points;
                 dgv1.Visible = true;
-                report = "SHEDWork";
-                weeklyLabel.Visible = true;
+                report = "SHEDWork";               
                 dataGrid.Rows.Clear();
                 dataGrid.Columns.Clear();
                 dataGrid.Visible = true;
@@ -146,6 +148,8 @@ namespace SHeDChecklist
                         dataGrid.Rows.Add("INCOMPLETE TASKS", percent);
                     }
                 }
+                weeklyLabel.Visible = true;
+                weeklyLabel.Text = "Week By Week Average Completion Rates For SHeD Tasks";
             }                           
         }
         private void triageReport_CheckedChanged(object sender, EventArgs e)
@@ -154,6 +158,9 @@ namespace SHeDChecklist
             {
                 studentsListBox.Items.Clear();
                 studentsListBox.Visible = false;
+                lineChart.Visible = false;
+                dataGrid.Visible = false;
+                generateButton.Visible = false;
                 dataGrid.Visible = false;
                 studentContributionLabel.Visible = false;
                 generateButton.Visible = false;
@@ -162,6 +169,8 @@ namespace SHeDChecklist
                 var points = d.GetTriagePoints("SHEDWork", "Generate Triage List");
                 dgv1.DataSource = points;
                 dgv1.Visible = true;
+                weeklyLabel.Visible = true;
+                weeklyLabel.Text = "Week By Week Average Elapsed Creation Time For SHeD Triage";
             }
         }
         public List<ChecklistItem> Sorting ()
@@ -178,9 +187,7 @@ namespace SHeDChecklist
         public void CreateSHEDTriageReport()
         {
             lineChart.Visible = false;
-            
-          
-   
+                      
         }       
         public List<ChecklistItem> SortingATC()
         {
@@ -299,32 +306,18 @@ namespace SHeDChecklist
                 }
             }
         }
-        private void button1_Click(object sender, EventArgs e)
-        {
-            var d = new Database();
-            var points = d.GetDataPoints("SHEDWork");
-            dgv1.DataSource = points;
-        }
-
-        private void studentContributionLabel_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void dataGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void atcRadioButton_CheckedChanged(object sender, EventArgs e)
+       private void atcRadioButton_CheckedChanged(object sender, EventArgs e)
         {
             if (atcRadioButton.Checked)
             {
-                var points2 = d.GetDataPoints("ATCWork");
+                studentsListBox.Items.Clear();
+                studentsListBox.Visible = false;
+                lineChart.Visible = false;
+                generateButton.Visible = false;           
+                var points2 = d.GetDataPoints("ATCWork");               
                 dgv1.DataSource = points2;
                 report = "ATCWork";
                 dgv1.Visible = true;
-                weeklyLabel.Visible = true;
                 dataGrid.Rows.Clear();
                 dataGrid.Columns.Clear();
                 dataGrid.Visible = true;
@@ -347,6 +340,8 @@ namespace SHeDChecklist
                         dataGrid.Rows.Add("INCOMPLETE TASKS", percent);
                     }
                 }
+                weeklyLabel.Visible = true;
+                weeklyLabel.Text = "Week By Week Average Completion Rates For ATC Tasks";
             }
         }
 
@@ -356,6 +351,8 @@ namespace SHeDChecklist
             {
                 studentsListBox.Items.Clear();
                 studentsListBox.Visible = false;
+                lineChart.Visible = false;
+                generateButton.Visible = false;
                 dataGrid.Visible = false;
                 studentContributionLabel.Visible = false;
                 generateButton.Visible = false;
@@ -364,6 +361,8 @@ namespace SHeDChecklist
                 var points = d.GetTriagePoints("ATCWork", "Daily Triage");
                 dgv1.DataSource = points;
                 dgv1.Visible = true;
+                weeklyLabel.Visible = true;
+                weeklyLabel.Text = "Week By Week Average Elapsed Creation Time For ATC Triage";
             }
         }
     }

@@ -57,8 +57,7 @@ namespace SHeDChecklist
         private OleDbDataReader read;
         private string query;
         private const string FILENAME = "StudentWork.accdb";
-        private string CONNECTIONSTRING2 = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=J:\SHeDChecklist\SHeDChecklist\" +  FILENAME;
-        private string CONNECTIONSTRING = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=C:\Users\Vestia\Desktop\SHeDChecklist\SHeDChecklist\StudentWork.mdb";
+        private string CONNECTIONSTRING = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=J:\SHeDChecklist\SHeDChecklist\" +  FILENAME;
         //this method checks the day the checklist was used.  If it isn't current day method returns false.
         public bool CheckDay()
         {
@@ -161,7 +160,7 @@ namespace SHeDChecklist
                 {
                     TriagePoints tp = new TriagePoints();
                     int daysBack = int.Parse(read[0].ToString());
-                    tp.Week_Of = DateTime.Now.AddDays(-1 * daysBack).ToShortDateString();
+                    tp.Week_Of = DateTime.Now.AddDays(-1 * daysBack + 1).ToShortDateString();
                     string time = read[1].ToString();
                     tp.Average_Elasped_Time = Math.Round(double.Parse(time) / 60,2);
                     items.Add(tp);
@@ -571,7 +570,7 @@ namespace SHeDChecklist
                     DataPoints d = new DataPoints();
                     int daysAgo;
                     daysAgo = -1 * int.Parse(read[0].ToString());
-                    d.Week_Of = DateTime.Now.AddDays(daysAgo).ToShortDateString();
+                    d.Week_Of = DateTime.Now.AddDays(daysAgo + 1).ToShortDateString();
                     d.Completed_Tasks = double.Parse(read[1].ToString());
                     d.Total_Tasks = double.Parse(read[2].ToString());
                     d.Percent_Completed = double.Parse(read[3].ToString());

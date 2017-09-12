@@ -150,7 +150,6 @@
             this.dataGrid.Size = new System.Drawing.Size(227, 380);
             this.dataGrid.TabIndex = 5;
             this.dataGrid.Visible = false;
-            this.dataGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGrid_CellContentClick);
             // 
             // studentContributionLabel
             // 
@@ -162,7 +161,6 @@
             this.studentContributionLabel.TabIndex = 6;
             this.studentContributionLabel.Text = "Overall Contribution By Student";
             this.studentContributionLabel.Visible = false;
-            this.studentContributionLabel.Click += new System.EventHandler(this.studentContributionLabel_Click);
             // 
             // studentsListBox
             // 
@@ -199,7 +197,7 @@
             // 
             this.weeklyLabel.AutoSize = true;
             this.weeklyLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.weeklyLabel.Location = new System.Drawing.Point(549, 213);
+            this.weeklyLabel.Location = new System.Drawing.Point(454, 213);
             this.weeklyLabel.Name = "weeklyLabel";
             this.weeklyLabel.Size = new System.Drawing.Size(248, 20);
             this.weeklyLabel.TabIndex = 11;
