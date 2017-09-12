@@ -9,7 +9,6 @@ namespace SHeDChecklist
     public partial class AdminForm : Form
     {
         string report = null;
-        int daysBack = 0;
         bool barGraph = false;
         Database d = new Database();
         bool timeGraph;
@@ -117,83 +116,53 @@ namespace SHeDChecklist
         private void shedRadioButton_CheckedChanged(object sender, EventArgs e)
         {
             studentsListBox.Items.Clear();
-            timeGraph = false;
-            lineChart.ChartAreas[0].AxisX.ScrollBar.Enabled = false;
-            lineChart.ChartAreas[0].AxisX.MajorGrid.Enabled = true;
-            lineChart.ChartAreas[0].AxisY.MajorGrid.Enabled = true;
             studentsListBox.Visible = false;
-            generateButton.Visible = false;
-            lineChart.ChartAreas[0].AxisY.Title = "Overall percentage";
-            lineChart.ChartAreas[0].AxisX.Title = "For week of";
-            lineChart.Series.Clear();
-            timeGraph = false;
-            ser1 = new Series();
-            ser1.ChartType = SeriesChartType.Line;
-            ser1.LegendText = "Actual Values";
-            ser1.Name = "Actual Values";
-            ser2.Points.Clear();
-            ser3.Points.Clear();
-            ser4.Points.Clear();           
-            RadioButton button = sender as RadioButton;
-            switch (button.Name)
+            if (shedRadioButton.Checked)
             {
-                case "shedRadioButton":
-                    var points = d.GetDataPoints("SHEDWork");
-                    dgv1.DataSource = points;
-                    dgv1.Visible = true;
-                    report = "SHEDWork";
-                    weeklyLabel.Visible = true;
-                    break;
-                case "atcRadioButton":
-                    var points2 = d.GetDataPoints("ATCWork");
-                    dgv1.DataSource = points2;
-                    report = "ATCWork";
-                    dgv1.Visible = true;
-                    weeklyLabel.Visible = true;
-                    break;
-            }         
-            dataGrid.Rows.Clear();
-            dataGrid.Columns.Clear();
-            dataGrid.Visible = true;
-            dataGrid.Columns.Add("Student", "Initials");
-            dataGrid.Columns.Add("Name", "Task");
-            double totalTasks = d.GetAllTasks(report);
-            studentContributionLabel.Visible = true;
-            foreach (string s in d.GetAllStudents(report))
-            {
-                if (s != string.Empty)
+                var points = d.GetDataPoints("SHEDWork");
+                dgv1.DataSource = points;
+                dgv1.Visible = true;
+                report = "SHEDWork";
+                weeklyLabel.Visible = true;
+                dataGrid.Rows.Clear();
+                dataGrid.Columns.Clear();
+                dataGrid.Visible = true;
+                dataGrid.Columns.Add("Student", "Initials");
+                dataGrid.Columns.Add("Name", "Percent Contribution");
+                double totalTasks = d.GetAllTasks(report);
+                studentContributionLabel.Visible = true;
+                foreach (string s in d.GetAllStudents(report))
                 {
-                    double studentTasks = d.StudentCounts(report, s);
-                    string percent = (studentTasks / totalTasks).ToString("P");
-                    dataGrid.Rows.Add(s, percent);
+                    if (s != string.Empty)
+                    {
+                        double studentTasks = d.StudentCounts(report, s);
+                        double percent = Math.Round(100 * (studentTasks / totalTasks),2);
+                        dataGrid.Rows.Add(s, percent);
+                    }
+                    else
+                    {
+                        double studentTasks = d.StudentCounts(report, s);
+                        double percent = Math.Round(100 *(studentTasks / totalTasks),2);
+                        dataGrid.Rows.Add("INCOMPLETE TASKS", percent);
+                    }
                 }
-                else
-                {
-                    double studentTasks = d.StudentCounts(report, s);
-                    string percent = (studentTasks / totalTasks).ToString("P");
-                    dataGrid.Rows.Add("INCOMPLETE TASKS", percent);
-                }    
-            }
+            }                           
         }
         private void triageReport_CheckedChanged(object sender, EventArgs e)
         {
-            studentsListBox.Items.Clear();
-            timeGraph = false;
-            lineChart.ChartAreas[0].AxisX.ScrollBar.Enabled = false;
-            dataGrid.Visible = false;
-            studentContributionLabel.Visible = false;
-            studentsListBox.Visible = false;
-            generateButton.Visible = false;
-            RadioButton button = sender as RadioButton;
-            dataGrid.Visible = false;
-            studentContributionLabel.Visible = false;
-            if (button.Name == "triageReport")
+            if (triageReport.Checked)
             {
-                var points = d.GetTriagePoints("SHEDWork");
+                studentsListBox.Items.Clear();
+                studentsListBox.Visible = false;
+                dataGrid.Visible = false;
+                studentContributionLabel.Visible = false;
+                generateButton.Visible = false;
+                dataGrid.Visible = false;
+                studentContributionLabel.Visible = false;
+                var points = d.GetTriagePoints("SHEDWork", "Generate Triage List");
+                dgv1.DataSource = points;
+                dgv1.Visible = true;
             }
-            else if (button.Name == "atcTriageReport")
-                CreateATCTriageReport();
-            
         }
         public List<ChecklistItem> Sorting ()
         {
@@ -212,121 +181,7 @@ namespace SHeDChecklist
             
           
    
-        }
-        public void CreateATCTriageReport()
-        {
-            lineChart.ChartAreas[0].AxisX.MajorGrid.Enabled = true;
-            lineChart.ChartAreas[0].AxisY.MajorGrid.Enabled = true;
-            double SigmaX = 0;
-            double SigmaXY = 0;
-            double SigmaY = 0;
-            lineChart.Series.Clear();
-            ser1 = new Series();
-            ser2 = new Series();
-            ser3 = new Series();
-            ser4 = new Series();
-            ser1.LegendText = "Actual Values";
-            ser1.ChartType = SeriesChartType.Point;
-            ser1.MarkerStyle = MarkerStyle.Diamond;
-            ser1.MarkerColor = System.Drawing.Color.Blue;
-            ser1.MarkerSize = 9;
-            ser2.ChartType = SeriesChartType.Line;
-            ser2.LegendText = "Regression";
-            ser2.MarkerStyle = MarkerStyle.Circle;
-            ser2.MarkerColor = System.Drawing.Color.Orange;
-            ser3.ChartType = SeriesChartType.Spline;
-            ser3.LegendText = "STD+1";
-            ser4.ChartType = SeriesChartType.Spline;
-            ser4.LegendText = "STD+2";
-            List<double> values = new List<double>();
-            List<double> values2 = new List<double>();
-            timeGraph = true;
-            TimeSpan TS = new TimeSpan(8, 00, 00);
-            lineChart.ChartAreas[0].AxisY.Minimum = 0;
-            TimeSpan start = new TimeSpan(8, 00, 00);
-            TimeSpan End = new TimeSpan(12, 00, 00);
-            int minutes = (start.Minutes - End.Minutes) + 60 * (End.Hours - start.Hours);
-            lineChart.ChartAreas[0].AxisY.Maximum = minutes;
-            int counter = 0;
-            List<ChecklistItem> items = d.GetATCTimes();
-            foreach (ChecklistItem c in SortingATC())
-            {
-                DateTime day = DateTime.Parse(c.day);
-                TimeSpan startTime = new TimeSpan(8, 00, 00);
-                TimeSpan recordTime = TimeSpan.Parse(c.time);
-                int differenceMins = recordTime.Minutes - startTime.Minutes;
-                int differenceHours = recordTime.Hours - startTime.Hours;
-                int output = differenceMins + differenceHours * 60;
-                if (output >= 240)
-                    output = 240;
-                values.Add(output);
-                DataPoint dp = new DataPoint();
-                dp.AxisLabel = day.ToShortDateString();
-                dp.SetValueXY(counter++, output);
-                ser1.Points.Add(dp);
-            }
-            lineChart.ChartAreas[0].AxisX.ScaleView.Size = counter;
-            int n = values.Count;
-            for (int i = n; i > 0; i--)
-            {
-                values2.Add(i);
-            }
-            SigmaX = values2.Sum();
-            SigmaY = values.Sum();
-            for (int y = 0; y < n; y++)
-            {
-                SigmaXY += values[y] * values2[y];
-            }
-            double SigmaXSquared = 0;
-            for (int y = 0; y < n; y++)
-            {
-                SigmaXSquared += Math.Pow(values2[y], 2);
-            }
-            double slope = ((n * SigmaXY) - (SigmaX * SigmaY)) / ((n * SigmaXSquared) - (Math.Pow(SigmaX, 2)));
-            slope = slope * -1;
-            double intercept = (SigmaY - slope * (SigmaX)) / n;
-            List<double> yVals = new List<double>();
-            for (int i = 0; i < n; i++)
-            {
-                DataPoint data = new DataPoint();
-                data.SetValueXY(i, intercept + slope * i);
-                if (i % 4 == 0)
-                    yVals.Add(intercept + slope * i);
-                ser2.Points.Add(data);
-            }
-            int sections = n / 4;
-            counter = 0;
-            while (counter < sections)
-            {
-                double sum = 0;
-                double mean = 0;
-                double sqrt = 0;
-                double mean2 = 0;
-                double distance = 0;
-                for (int i = counter * 4; i < (counter + 1) * 4; i++)
-                {
-                    sum += values[i];
-                }
-                mean = sum / 4;
-                for (int j = counter * 4; j < (counter + 1) * 4; j++)
-                {
-                    distance += Math.Pow(values[j] - mean, 2);
-                }
-                mean2 = distance / 4;
-                sqrt = Math.Sqrt(mean2);
-                DataPoint data2 = new DataPoint();
-                data2.SetValueXY((counter) * 4, yVals[counter] + sqrt);
-                DataPoint data3 = new DataPoint();
-                data3.SetValueXY((counter) * 4, yVals[counter] - sqrt);
-                ser3.Points.Add(data2);
-                ser4.Points.Add(data3);
-                counter++;
-            }
-            lineChart.Series.Add(ser1);
-            lineChart.Series.Add(ser2);
-            lineChart.Series.Add(ser3);
-            lineChart.Series.Add(ser4);
-        }
+        }       
         public List<ChecklistItem> SortingATC()
         {
             List<ChecklistItem> items = new List<ChecklistItem>();
@@ -444,13 +299,6 @@ namespace SHeDChecklist
                 }
             }
         }
-
-        private void AdminForm_Load(object sender, EventArgs e)
-        {
-            //Causes JIT Error, queries to delete out old records should be done directly through access
-            //d.RunAccessQueries();
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
             var d = new Database();
@@ -466,6 +314,57 @@ namespace SHeDChecklist
         private void dataGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
+        }
+
+        private void atcRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (atcRadioButton.Checked)
+            {
+                var points2 = d.GetDataPoints("ATCWork");
+                dgv1.DataSource = points2;
+                report = "ATCWork";
+                dgv1.Visible = true;
+                weeklyLabel.Visible = true;
+                dataGrid.Rows.Clear();
+                dataGrid.Columns.Clear();
+                dataGrid.Visible = true;
+                dataGrid.Columns.Add("Student", "Initials");
+                dataGrid.Columns.Add("Name", "Percent Contribution");
+                double totalTasks = d.GetAllTasks(report);
+                studentContributionLabel.Visible = true;
+                foreach (string s in d.GetAllStudents(report))
+                {
+                    if (s != string.Empty)
+                    {
+                        double studentTasks = d.StudentCounts(report, s);
+                        double percent = Math.Round(100*(studentTasks / totalTasks),2);
+                        dataGrid.Rows.Add(s, percent);
+                    }
+                    else
+                    {
+                        double studentTasks = d.StudentCounts(report, s);
+                        double percent = Math.Round(100 *(studentTasks / totalTasks),2);
+                        dataGrid.Rows.Add("INCOMPLETE TASKS", percent);
+                    }
+                }
+            }
+        }
+
+        private void atcTriageReport_CheckedChanged(object sender, EventArgs e)
+        {
+            if (atcTriageReport.Checked)
+            {
+                studentsListBox.Items.Clear();
+                studentsListBox.Visible = false;
+                dataGrid.Visible = false;
+                studentContributionLabel.Visible = false;
+                generateButton.Visible = false;
+                dataGrid.Visible = false;
+                studentContributionLabel.Visible = false;
+                var points = d.GetTriagePoints("ATCWork", "Daily Triage");
+                dgv1.DataSource = points;
+                dgv1.Visible = true;
+            }
         }
     }
 }

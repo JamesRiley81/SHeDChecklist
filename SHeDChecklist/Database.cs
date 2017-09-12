@@ -57,8 +57,8 @@ namespace SHeDChecklist
         private OleDbDataReader read;
         private string query;
         private const string FILENAME = "StudentWork.accdb";
-        private string CONNECTIONSTRING = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=J:\SHeDChecklist\SHeDChecklist\" +  FILENAME;
-        private string CONNECTIONSTRING2 = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=C:\Users\Vestia\Desktop\SHeDChecklist\SHeDChecklist\StudentWork.mdb";
+        private string CONNECTIONSTRING2 = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=J:\SHeDChecklist\SHeDChecklist\" +  FILENAME;
+        private string CONNECTIONSTRING = @"Provider=Microsoft.ACE.OLEDB.12.0; Data Source=C:\Users\Vestia\Desktop\SHeDChecklist\SHeDChecklist\StudentWork.mdb";
         //this method checks the day the checklist was used.  If it isn't current day method returns false.
         public bool CheckDay()
         {
@@ -139,35 +139,31 @@ namespace SHeDChecklist
             }
             return students;
         }
-        public List<TriagePoints> GetTriagePoints(string tableName)
+        public List<TriagePoints> GetTriagePoints(string tableName, string triageTitle)
         {
             var items = new List<TriagePoints>();
             var elapsedTimes = new List<int>();
             string query = "";
             try
             {
-                for (int i = 180; i >= 7; i -= 7)
+                for (int i = 182; i >= 7; i -= 7)
                 {
-                    query += "SELECT TaskDate, TimeOfDay FROM SHEDWork WHERE Task = 'Generate Triage List' AND DATEVALUE(TaskDate) BETWEEN Now() -" + i.ToString() + " AND Now() -" + (i - 7).ToString() + " UNION ";
+                    query += "SELECT " + i.ToString() + " AS History,  SUM(DateDiff('s', TIMEVALUE('7:30'), TIMEVALUE(TimeOfDay)))/(SELECT COUNT(*) FROM " + tableName + " WHERE Task = '" + triageTitle + "' AND DATEVALUE(TaskDate) BETWEEN Now() -" + i.ToString() + " AND Now() -" + (i - 7).ToString()+")  AS TimeIntervals FROM " + tableName + "  WHERE Task = '" + triageTitle + "'  AND DATEVALUE(TaskDate) BETWEEN Now() -" + i.ToString() + " AND Now() -" + (i - 7).ToString() + " UNION ";
                 }
 
                 conn = new OleDbConnection(CONNECTIONSTRING);
                 string getQuery = query.Remove(query.Length - 6);
+                getQuery += " Order By History Desc";
                 com = new OleDbCommand(getQuery, conn);
                 conn.Open();
                 read = com.ExecuteReader();
                 while (read.Read())
                 {
                     TriagePoints tp = new TriagePoints();
-                    tp.Week_Of = read[0].ToString();
+                    int daysBack = int.Parse(read[0].ToString());
+                    tp.Week_Of = DateTime.Now.AddDays(-1 * daysBack).ToShortDateString();
                     string time = read[1].ToString();
-                    if (time == "")
-                        time = "17:00";
-                    TimeSpan timeE = TimeSpan.Parse(time);
-                    TimeSpan start = TimeSpan.Parse("7:30");
-                    TimeSpan span = timeE.Subtract(start);
-                    elapsedTimes.Add(span.Minutes);
-                    tp.Average_Elasped_Time = elapsedTimes.Sum() / elapsedTimes.Count();
+                    tp.Average_Elasped_Time = Math.Round(double.Parse(time) / 60,2);
                     items.Add(tp);
                 }
                 conn.Close();
@@ -552,56 +548,7 @@ namespace SHeDChecklist
             }
         }
     
-        public bool CreateATCDataPoints()
-        {
-            try
-            {
-                var collection = GetDataPoints("ATCWork");
-                double SigmaX = 0;
-                double SigmaY = 0;
-                double SigmaXY = 0;
-                double SigmaXsquared = 0;
-                int n = collection.Count();
-                foreach (var x in collection)
-                {
-                }
-                foreach (var y in collection)
-                {
-                }
-                for (int i = 0; i < 5; i++)
-                {
-                }
-                double slope = ((n * SigmaXY) - (SigmaX * SigmaY)) / ((n * SigmaXsquared) - (Math.Pow(SigmaX, 2)));
-                slope = slope * -1;
-                double intercept = (SigmaY - slope * (SigmaX)) / n;
-                var newList = new List<DataPoints>();
-                int counter = 0;
-                foreach (var x in collection)
-                {
-                    var DP = new DataPoints();
-               
-                    newList.Add(DP);
-                    counter++;
-                }
-                foreach (var point in newList)
-                {
-                    query = "INSERT INTO LinearValues (Report, XValue, YValue) VALUES(?, ?,?)";
-                    conn = new OleDbConnection(CONNECTIONSTRING);
-                    com = new OleDbCommand(query, conn);
-                    conn.Open();
-                    com.Parameters.AddWithValue(@"Report", "ATCWork");
-            
-                    com.ExecuteNonQuery();
-                    conn.Close();
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Could not create linear regression points for SHEDWork, please contact admin for help.");
-                return false;
-            }
-        }
+        
         
         public List<DataPoints> GetDataPoints(string table)
         {

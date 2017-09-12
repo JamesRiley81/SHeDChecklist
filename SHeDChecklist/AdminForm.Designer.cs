@@ -115,7 +115,7 @@
             this.atcTriageReport.TabStop = true;
             this.atcTriageReport.Text = "ATC Triage Report";
             this.atcTriageReport.UseVisualStyleBackColor = true;
-            this.atcTriageReport.CheckedChanged += new System.EventHandler(this.triageReport_CheckedChanged);
+            this.atcTriageReport.CheckedChanged += new System.EventHandler(this.atcTriageReport_CheckedChanged);
             // 
             // triageReport
             // 
@@ -139,7 +139,7 @@
             this.atcRadioButton.TabStop = true;
             this.atcRadioButton.Text = "ATC Report";
             this.atcRadioButton.UseVisualStyleBackColor = true;
-            this.atcRadioButton.CheckedChanged += new System.EventHandler(this.shedRadioButton_CheckedChanged);
+            this.atcRadioButton.CheckedChanged += new System.EventHandler(this.atcRadioButton_CheckedChanged);
             // 
             // dataGrid
             // 
@@ -222,7 +222,6 @@
             this.Controls.Add(this.panel1);
             this.Name = "AdminForm";
             this.Text = "AdminForm";
-            this.Load += new System.EventHandler(this.AdminForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.lineChart)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
